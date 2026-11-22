@@ -12,7 +12,11 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.muse.wallpapers
+        PRODUCT_NAME: Wallpapers
+        GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: 壁纸
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: 把壁纸保存到相册，方便设置为锁屏和主屏幕墙纸。
         INFOPLIST_KEY_UILaunchStoryboardName: ""
         TARGETED_DEVICE_FAMILY: "1,2"
