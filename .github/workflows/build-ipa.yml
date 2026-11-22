@@ -1,0 +1,60 @@
+name: Build IPA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: xcode-27
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 27.2 (iOS 27.2 SDK)
+        run: |
+          ls /Applications | grep -i xcode || true
+          XCODE_272=$(ls -d /Applications/Xcode_27.2*.app 2>/dev/null | head -1)
+          if [ -n "$XCODE_272" ]; then
+            sudo xcode-select -s "$XCODE_272"
+          else
+            LATEST_27=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1)
+            if [ -n "$LATEST_27" ]; then sudo xcode-select -s "$LATEST_27"; fi
+          fi
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i iphoneos || true
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Build (unsigned)
+        run: |
+          xcodebuild -project Wallpapers.xcodeproj \
+            -scheme Wallpapers \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            clean build
+
+      - name: Package IPA
+        run: |
+          APP_PATH=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
+          echo "App: $APP_PATH"
+          ls "$APP_PATH" | head -40
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -qry Wallpapers.ipa Payload
+          ls -la Wallpapers.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wallpapers-ipa
+          path: Wallpapers.ipa
+          if-no-files-found: error
